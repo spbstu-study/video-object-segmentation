@@ -65,7 +65,7 @@ async def convert_mp4_to_jpg(video: bytes, progress_callback=None) -> str:
     return current_temp_path
 
 
-async def convert_jpg_to_mp4(input_dir: str, progress_callback=None) -> bytes:
+async def convert_jpg_to_mp4(input_dir: str, framerate: float, progress_callback=None) -> bytes:
     # Путь к временному файлу для финального видео
     output_video_path = os.path.join(input_dir, 'output.mp4')
 
@@ -76,9 +76,6 @@ async def convert_jpg_to_mp4(input_dir: str, progress_callback=None) -> bytes:
         raise ValueError("Нет изображений для конвертации.")
 
     input_pattern = os.path.join(input_dir, 'frame_%05d.jpg')
-
-    input_video_path = os.path.join(input_dir, 'input.mp4')
-    framerate = await __get_video_fps(input_video_path)
 
     # Запускаем ffmpeg для создания видео
     process = await asyncio.create_subprocess_exec(
@@ -129,7 +126,7 @@ async def convert_jpg_to_mp4(input_dir: str, progress_callback=None) -> bytes:
     return video_bytes
 
 
-async def __get_video_fps(video_path: str) -> float:
+async def get_video_fps(video_path: str) -> float:
     """Получение частоты кадров из видеофайла с помощью ffprobe."""
     process = await asyncio.create_subprocess_exec(
         'ffprobe',

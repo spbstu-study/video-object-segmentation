@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import telegram
 from telegram import Update
@@ -7,7 +8,9 @@ from telegram.ext import ContextTypes, Application, MessageHandler, filters
 
 import config
 from bot.userdata import UserData
-from utils.video import convert_mp4_to_jpg, convert_jpg_to_mp4
+from neural_network.video_predict import video_predict
+from utils.video import convert_mp4_to_jpg, convert_jpg_to_mp4, get_video_fps
+from model import model
 
 
 class VideoHandler:
@@ -38,17 +41,24 @@ class VideoHandler:
         video_file = await video.get_file()
         video_bytes = await video_file.download_as_bytearray()
         frame_dir = await convert_mp4_to_jpg(video_bytes, progress_callback=update_progress)
+        input_video_path = os.path.join(frame_dir, 'input.mp4')
+        processed_dir = f'{frame_dir}/processed/'
 
         await user_data.minor_message.edit_text(
             config.message('minor.caption.processing')
                 .replace('<status>', config.message('status.processing.ai'))
         )
 
+        if not os.path.exists(processed_dir):
+            os.mkdir(processed_dir)
+        await video_predict(model, f'{frame_dir}/*.jpg', processed_dir)
+
         await user_data.minor_message.edit_text(
             config.message('minor.caption.processing')
             .replace('<status>', config.message('status.processing.form'))
         )
-        video_bytes = await convert_jpg_to_mp4(frame_dir, progress_callback=update_progress)
+        framerate = await get_video_fps(input_video_path)
+        video_bytes = await convert_jpg_to_mp4(processed_dir, framerate, progress_callback=update_progress)
 
         retries = 5
         for attempt in range(retries):
