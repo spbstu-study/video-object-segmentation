@@ -1,4 +1,9 @@
 {
   "main.caption.welcome": "\uD83D\uDC4B Привет!\n\nОтправь видео, и я определю объекты, которые на нём находятся! ✨ \n\n❗\uFE0F Видео должно быть в формате mp4, а его размер не должен превышать N Мб.",
-  "minor.caption.processing": "Обработка видео... \uD83D\uDCF9\n\n⚙\uFE0F\n<status>\n\nПо окончании обработки я отправлю видео с выделенными объектами."
+  "minor.caption.processing": "Обработка видео... \uD83D\uDCF9\n\n⚙\uFE0F\n<status>\n\nПо окончании обработки я отправлю видео с выделенными объектами.",
+  "status.processing.download": "Скачивание видео...",
+  "status.processing.prepare": "Подготовка видео: <pct>%",
+  "status.processing.ai": "Нейросеть определяет объекты...",
+  "status.processing.upload": "Загрузка...",
+  "status.processing.complete": "Обработка завершена ✅"
 }
