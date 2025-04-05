@@ -20,7 +20,12 @@ logging.basicConfig(
 def main():
     context_types: ContextTypes = ContextTypes(user_data=UserData)
 
-    application: Application = ApplicationBuilder().token(TOKEN).context_types(context_types).arbitrary_callback_data(True).build()
+    application: Application = (ApplicationBuilder()
+        .token(TOKEN)
+        .context_types(context_types)
+        .arbitrary_callback_data(True)
+        .build()
+    )
 
     StartHandler(application)
     VideoHandler(application)

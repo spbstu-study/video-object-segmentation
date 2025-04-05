@@ -1,9 +1,13 @@
+import asyncio
+
+import telegram
 from telegram import Update
+from telegram.error import TimedOut
 from telegram.ext import ContextTypes, Application, MessageHandler, filters
 
 import config
 from bot.userdata import UserData
-from utils.video import prepare_video
+from utils.video import convert_mp4_to_jpg, convert_jpg_to_mp4
 
 
 class VideoHandler:
@@ -19,18 +23,21 @@ class VideoHandler:
         )
 
         async def update_progress(pct):
-            await user_data.minor_message.edit_text(
-                config.message('minor.caption.processing')
-                    .replace(
-                    '<status>',
-                    config.message('status.processing.prepare')
-                        .replace('<pct>', str(pct))
+            try:
+                await user_data.minor_message.edit_text(
+                    config.message('minor.caption.processing')
+                        .replace(
+                        '<status>',
+                        config.message('status.processing.prepare')
+                            .replace('<pct>', str(pct))
+                    )
                 )
-            )
+            except telegram.error.BadRequest:
+                pass
         video = update.message.video
         video_file = await video.get_file()
         video_bytes = await video_file.download_as_bytearray()
-        frame_dir = await prepare_video(video_bytes, progress_callback=update_progress)
+        frame_dir = await convert_mp4_to_jpg(video_bytes, progress_callback=update_progress)
 
         await user_data.minor_message.edit_text(
             config.message('minor.caption.processing')
@@ -39,8 +46,18 @@ class VideoHandler:
 
         await user_data.minor_message.edit_text(
             config.message('minor.caption.processing')
-                .replace('<status>', config.message('status.processing.upload'))
+            .replace('<status>', config.message('status.processing.form'))
         )
+        video_bytes = await convert_jpg_to_mp4(frame_dir, progress_callback=update_progress)
+
+        retries = 5
+        for attempt in range(retries):
+            try:
+                await update.message.chat.send_video(video_bytes)
+                break
+            except TimedOut:
+                print(f"Timeout error, retrying ({attempt + 1}/{retries})...")
+                await asyncio.sleep(2)
 
         await user_data.minor_message.edit_text(
             config.message('minor.caption.processing')

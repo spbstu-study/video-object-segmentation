@@ -4,6 +4,7 @@
   "status.processing.download": "Скачивание видео...",
   "status.processing.prepare": "Подготовка видео: <pct>%",
   "status.processing.ai": "Нейросеть определяет объекты...",
+  "status.processing.form": "Формирование видео...",
   "status.processing.upload": "Загрузка...",
   "status.processing.complete": "Обработка завершена ✅"
 }
